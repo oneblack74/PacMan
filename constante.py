@@ -1,0 +1,14 @@
+pac_dot = 10
+power_pellet = 50
+ghost_1 = 200
+ghost_2 = 400
+ghost_3 = 800
+ghost_4 = 1600
+cherry = 100
+strawberry = 300
+orange = 500
+apple = 700
+melon = 1000
+galaxian = 2000
+bell = 3000
+key = 5000
