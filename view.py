@@ -2,7 +2,7 @@ import sys, math, time
 from function import *
 import menu
 import player
-import blinky
+import blinky, pinky
 import pygame as pg
 
 
@@ -21,6 +21,7 @@ class View:
         self.map = creerMap()
         self.p = player.Player()
         self.blinky = blinky.Blinky()
+        self.pinky = pinky.Pinky()
         self.timer = 0
         self.timeSprite = 0
         self.cptSprite = 0
@@ -146,7 +147,7 @@ class View:
             else:
                 if self.m1.indGet() == 0:
                     if self.start:
-                        if self.run and testDead(self.blinky.xGet(), self.blinky.yGet(), self.p.xGet(), self.p.yGet(), self.blinky.stateGet()):
+                        if self.run and (testDead(self.blinky.xGet(), self.blinky.yGet(), self.p.xGet(), self.p.yGet(), self.blinky.stateGet()) or testDead(self.pinky.xGet(), self.pinky.yGet(), self.p.xGet(), self.p.yGet(), self.pinky.stateGet())):
                             self.run = False
                             self.timer = time.time()
                         elif self.run and self.p.pBouleGet() == 240 and self.p.gBouleGet() == 4:
@@ -161,6 +162,7 @@ class View:
                                 self.p.passer_lvl_suiv()
                                 self.start = False
                                 self.blinky.reInit()
+                                self.pinky.reInit()
                                 self.run = True
                                 self.win = False
 
@@ -169,27 +171,34 @@ class View:
                                     self.p.perdreVie()
                                     self.start = False
                                     self.blinky.reInit()
+                                    self.pinky.reInit()
                                     self.p.reInit()
                                     self.run = True
                                 else:
                                     res = "game "+str(self.nbGame)+": "+str(self.p.pointGet())+" pts"
                                     print(res)
-                                    self.m2.updateScore(self.p.lvlGet(), self.p.pointGet())
+                                    self.m2.stateWriteSet(True)
+                                    self.m2.scoreActuelSet(self.p.lvlGet(), self.p.pointGet())
+                                    self.m1.indSet(1)
                                     self.nbGame += 1
                                     self.map = creerMap()[:]
                                     self.blinky.reInit()
+                                    self.pinky.reInit()
                                     self.p.respawn()
                                     self.start = False
                                     self.run = True
                                     self.p.estAfficheSet(False)
-                                    self.m1.active()
+                                    #self.m1.stateSet(True)
 
                         if self.blinky.eatenStartGet():
+                            self.p.mangerGhost()
+                        if self.pinky.eatenStartGet():
                             self.p.mangerGhost()
 
                         self.p.controls()
                         self.p.run(self.map, self.run)
                         self.blinky.run(self.p.xGet(), self.p.yGet(), self.map, self.p.powerStartGet(), self.run)
+                        self.pinky.run(self.p.xGet(), self.p.yGet(), self.map, self.p.powerStartGet(), self.run, self.p.dirGet())
                     else:
                         keys = pg.key.get_pressed()
 
@@ -203,6 +212,7 @@ class View:
                     self.draw()
                     self.p.draw(self.surface)
                     self.blinky.draw(self.surface)
+                    self.pinky.draw(self.surface)
                     self.drawUi()
 
                 elif self.m1.indGet() == 1:
@@ -210,7 +220,7 @@ class View:
                     self.m2.run()
 
                     if not self.m2.stateGet():
-                        self.m1.active()
+                        self.m1.stateSet(True)
 
                     self.m2.draw()
 

@@ -24,6 +24,6 @@ def coordPossible(x, y):
 
 
 def testDead(gx, gy, px, py, state):
-    if gx == px and gy == py and state in ["chase", "scatter"]:
+    if (gx == px) and (gy == py) and (state in ["chase", "scatter"]):
         return True
     return False

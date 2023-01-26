@@ -14,7 +14,6 @@ class Player:
         self.dirTmp = "R"
         self.cptSprite = 0
         self.timeSprite = time.time()
-        #15 18
         self.x = 20*15 -10
         self.y = 20*24
         self.tmpx = 20*15
@@ -25,12 +24,21 @@ class Player:
 
         self.death = False
         self.estAffiche = True
-
+        self.speed = 0.30
         self.point = 0
         self.cptPBoule = 0
         self.cptGBoule = 0
 
         self.lvl = 1
+
+    def in_couloir(self):
+        t = 20
+        x = round(self.x+12) // t
+        y = round(self.y+12) // t
+        if y == 15 and (x < 6 or x > 23):
+            self.dirTmp = self.dir
+            return True
+        return False
 
     def lifeGet(self):
         return self.life
@@ -48,10 +56,10 @@ class Player:
         return self.cptGBoule
 
     def xGet(self):
-        return self.x//20
+        return (self.x+12)//20
 
     def yGet(self):
-        return self.y//20
+        return (self.y+12)//20
 
     def powerGet(self):
         return self.power
@@ -59,7 +67,8 @@ class Player:
     def pointGet(self):
         return self.point
 
-
+    def dirGet(self):
+        return self.dir
 
     def imgUiGet(self):
         return self.img["L1"]
@@ -85,6 +94,8 @@ class Player:
     def respawn(self):
         self.life = 3
         self.point = 0
+        self.cptPBoule = 0
+        self.cptGBoule = 0
         self.lvl = 1
         self.reInit()
 
@@ -121,10 +132,11 @@ class Player:
     def controls(self):
         keys = pg.key.get_pressed()
 
-        if keys[pg.K_UP]:
-            self.dirTmp = "U"
-        if keys[pg.K_DOWN]:
-            self.dirTmp = "D"
+        if not self.in_couloir():
+            if keys[pg.K_UP]:
+                self.dirTmp = "U"
+            if keys[pg.K_DOWN]:
+                self.dirTmp = "D"
         if keys[pg.K_RIGHT]:
             self.dirTmp = "R"
         if keys[pg.K_LEFT]:
@@ -133,8 +145,8 @@ class Player:
 
     def verifRotate(self, map):
         t = 20
-        x = round(self.x) // t
-        y = round(self.y) // t
+        x = round(self.x+12) // t
+        y = round(self.y+12) // t
         if int(self.x) % t == 0 and int(self.y) % t == 0:
             match self.dirTmp:
                 case "U":
@@ -153,8 +165,8 @@ class Player:
 
     def verifDeplacement(self, map):
         t = 20
-        x = round(self.x) // t
-        y = round(self.y) // t
+        x = round(self.x+12) // t
+        y = round(self.y+12) // t
         if int(self.x) % t == 0 and int(self.y) % t == 0:
             match self.dir:
                 case "U":
@@ -174,29 +186,36 @@ class Player:
 
     def deplacement(self):
         t = 20
-        x = round(self.x) // t
-        y = round(self.y) // t
-        if x == -1 and y == 15 and self.dir == "L":
-            self.x = 29*t
-        elif x == 29 and y == 15 and self.dir == "R":
-            self.x = -1
-        match self.dir:
-            case "U":
-                self.y -= 0.25
-            case "D":
-                self.y += 0.25
-            case "R":
-                self.x += 0.25
-            case "L":
-                self.x -= 0.25
+        x = round(self.x+12) // t
+        y = round(self.y+12) // t
+        if x == -1:
+            self.x = 28*t
+            self.y = 15*t
+            self.dir = "L"
+            self.dirTmp = "L"
+        elif x == 29:
+            self.x = 0
+            self.y = 15 * t
+            self.dir = "R"
+            self.dirTmp = "R"
+        else:
+            match self.dir:
+                case "U":
+                    self.y -= self.speed
+                case "D":
+                    self.y += self.speed
+                case "R":
+                    self.x += self.speed
+                case "L":
+                    self.x -= self.speed
 
     def draw(self, surface):
         surface.blit(self.img[self.dir+str(self.cptSprite)], (self.x-2, self.y-2))
 
     def eat(self, map):
         t = 20
-        x = round(self.x) // t
-        y = round(self.y) // t
+        x = round(self.x+12) // t
+        y = round(self.y+12) // t
         if map[y][x] == ".":
             self.cptPBoule += 1
             self.point += pac_dot
@@ -224,3 +243,4 @@ class Player:
         else:
             if time.time() - self.timer >= 4:
                 self.estAffiche = False
+
